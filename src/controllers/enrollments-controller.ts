@@ -2,6 +2,8 @@ import { AuthenticatedRequest } from "@/middlewares";
 import enrollmentsService from "@/services/enrollments-service";
 import { Response } from "express";
 import httpStatus from "http-status";
+import { CepSchema } from "@/schemas/cep-schema";
+import { Cep } from "@/protocols";
 
 export async function getEnrollmentByUser(req: AuthenticatedRequest, res: Response) {
   const { userId } = req;
@@ -16,6 +18,15 @@ export async function getEnrollmentByUser(req: AuthenticatedRequest, res: Respon
 }
 
 export async function postCreateOrUpdateEnrollment(req: AuthenticatedRequest, res: Response) {
+  const { cep } = req.body as Cep
+
+  const { error } = CepSchema.validate(cep);
+    if (error){
+        return res.status(400).send({
+            message: error.message
+        })
+    }
+  
   try {
     await enrollmentsService.createOrUpdateEnrollmentWithAddress({
       ...req.body,
